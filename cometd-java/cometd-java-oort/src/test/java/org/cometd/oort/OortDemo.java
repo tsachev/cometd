@@ -25,7 +25,7 @@ import org.cometd.websocket.server.WebSocketTransport;
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
@@ -58,23 +58,20 @@ public class OortDemo
     {
         String base=".";
 
-        // Manually contruct context to avoid hassles with webapp classloaders for now.
-        _server = new Server();
-
-        // Setup JMX
-        MBeanContainer mbContainer=new MBeanContainer(ManagementFactory.getPlatformMBeanServer());
-        _server.getContainer().addEventListener(mbContainer);
-        _server.addBean(mbContainer);
-
         QueuedThreadPool qtp = new QueuedThreadPool();
         qtp.setMinThreads(5);
         qtp.setMaxThreads(200);
-        _server.setThreadPool(qtp);
+        // Manually contruct context to avoid hassles with webapp classloaders for now.
+        _server = new Server(qtp);
 
-        SelectChannelConnector connector=new SelectChannelConnector();
+        // Setup JMX
+        MBeanContainer mbContainer=new MBeanContainer(ManagementFactory.getPlatformMBeanServer());
+        _server.addBean(mbContainer);
+
+
+        ServerConnector connector=new ServerConnector(_server);
         // SocketConnector connector=new SocketConnector();
         connector.setPort(port);
-        _server.addConnector(connector);
 
         ContextHandlerCollection contexts = new ContextHandlerCollection();
         _server.setHandler(contexts);

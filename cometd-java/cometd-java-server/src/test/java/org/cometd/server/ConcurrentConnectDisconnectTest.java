@@ -27,7 +27,7 @@ import org.cometd.bayeux.server.ServerSession;
 import org.cometd.server.transport.JSONTransport;
 import org.eclipse.jetty.client.ContentExchange;
 import org.eclipse.jetty.client.HttpExchange;
-import org.eclipse.jetty.http.HttpHeaders;
+import org.eclipse.jetty.http.HttpHeader;
 import org.junit.Assert;
 import org.junit.Test;
 

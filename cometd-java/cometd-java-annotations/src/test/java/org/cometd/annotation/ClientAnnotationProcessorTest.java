@@ -34,7 +34,7 @@ import org.cometd.server.CometdServlet;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.After;
@@ -62,8 +62,8 @@ public class ClientAnnotationProcessorTest
     {
         server = new Server();
 
-        Connector connector = new SelectChannelConnector();
-        connector.setMaxIdleTime(30000);
+        ServerConnector connector = new ServerConnector(server);
+        connector.setIdleTimeout(30000);
         server.addConnector(connector);
 
         String contextPath = "";

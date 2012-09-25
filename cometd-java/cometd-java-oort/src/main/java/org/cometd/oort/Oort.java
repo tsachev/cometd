@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -54,11 +55,13 @@ import org.cometd.server.authorizer.GrantAuthorizer;
 import org.cometd.server.ext.AcknowledgedMessagesExtension;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.util.B64Code;
-import org.eclipse.jetty.util.component.AggregateLifeCycle;
+import org.eclipse.jetty.util.annotation.ManagedAttribute;
+import org.eclipse.jetty.util.annotation.ManagedObject;
+import org.eclipse.jetty.util.component.ContainerLifeCycle;
 import org.eclipse.jetty.util.component.LifeCycle;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
-import org.eclipse.jetty.websocket.WebSocketClientFactory;
+import org.eclipse.jetty.websocket.client.WebSocketClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +81,8 @@ import org.slf4j.LoggerFactory;
  * @see OortMulticastConfigServlet
  * @see OortStaticConfigServlet
  */
-public class Oort extends AggregateLifeCycle
+@ManagedObject("CometD Oort Cloud Cluster controller")
+public class Oort extends ContainerLifeCycle
 {
     public final static String OORT_ATTRIBUTE = Oort.class.getName();
     public static final String EXT_OORT_FIELD = "org.cometd.oort";
@@ -137,7 +141,7 @@ public class Oort extends AggregateLifeCycle
         if (_httpClient == null)
         {
             _httpClient = new HttpClient();
-            _httpClient.setThreadPool(_threadPool);
+            _httpClient.setExecutor(_threadPool);
         }
         addBean(_httpClient);
 
@@ -210,6 +214,7 @@ public class Oort extends AggregateLifeCycle
     /**
      * @return the public absolute URL of the Oort CometD server
      */
+    @ManagedAttribute(value = "The URL of this cometd server", readonly = true)
     public String getURL()
     {
         return _url;
@@ -220,6 +225,7 @@ public class Oort extends AggregateLifeCycle
         return _id;
     }
 
+    @ManagedAttribute("The random secret of this cometd server")
     public String getSecret()
     {
         return _secret;
@@ -248,6 +254,7 @@ public class Oort extends AggregateLifeCycle
             _logger.debug(message, args);
     }
 
+    @ManagedAttribute("Debugging for cometd clients used by Oort")
     public boolean isClientDebugEnabled()
     {
         return _clientDebug;
@@ -408,6 +415,7 @@ public class Oort extends AggregateLifeCycle
     /**
      * @return the set of known Oort comet servers URLs.
      */
+    @ManagedAttribute(value = "URLs of known cometd servers", readonly = true)
     public Set<String> getKnownComets()
     {
         Set<String> result = new HashSet<String>();
@@ -754,6 +762,12 @@ public class Oort extends AggregateLifeCycle
     protected Logger getLogger()
     {
         return _logger;
+    }
+
+    @ManagedAttribute(name = "ObservedChannels", value = "Channels that are replicated between cometd instances", readonly = true)
+    public Set<String> getSortedObservedChannels()
+    {
+    	return new TreeSet<>(_channels.keySet());
     }
 
     public Set<String> getObservedChannels()

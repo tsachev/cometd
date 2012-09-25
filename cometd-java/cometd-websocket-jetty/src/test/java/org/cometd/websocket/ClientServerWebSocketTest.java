@@ -26,7 +26,7 @@ import org.cometd.websocket.client.WebSocketTransport;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.server.nio.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
@@ -63,7 +63,7 @@ public abstract class ClientServerWebSocketTest
     {
         server = new Server();
 
-        connector = new SelectChannelConnector();
+        connector = new ServerConnector();
         connector.setMaxIdleTime(30000);
         server.addConnector(connector);
 

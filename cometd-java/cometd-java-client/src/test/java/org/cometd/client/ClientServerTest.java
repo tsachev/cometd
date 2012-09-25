@@ -24,7 +24,7 @@ import org.cometd.server.CometdServlet;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.After;
@@ -56,7 +56,7 @@ public class ClientServerTest
     {
         server = new Server();
 
-        connector = new SelectChannelConnector();
+        connector = new ServerConnector();
         connector.setMaxIdleTime(30000);
         server.addConnector(connector);
 

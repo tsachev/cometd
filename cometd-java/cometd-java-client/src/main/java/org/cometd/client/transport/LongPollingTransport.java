@@ -33,7 +33,7 @@ import org.cometd.bayeux.Channel;
 import org.cometd.bayeux.Message;
 import org.eclipse.jetty.client.ContentExchange;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.http.HttpHeaders;
+import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.io.Buffer;
 import org.eclipse.jetty.io.ByteArrayBuffer;
 import org.eclipse.jetty.util.QuotedStringTokenizer;
@@ -190,7 +190,7 @@ public class LongPollingTransport extends HttpClientTransport
                 builder.append(cookie.asString());
             }
             if (builder.length() > 0)
-                exchange.setRequestHeader(HttpHeaders.COOKIE, builder.toString());
+                exchange.setRequestHeader(HttpHeader.COOKIE, builder.toString());
         }
     }
 
@@ -216,8 +216,8 @@ public class LongPollingTransport extends HttpClientTransport
         protected void onResponseHeader(Buffer name, Buffer value) throws IOException
         {
             super.onResponseHeader(name, value);
-            int headerName = HttpHeaders.CACHE.getOrdinal(name);
-            if (headerName == HttpHeaders.SET_COOKIE_ORDINAL)
+            headerName = HttpHeader.CACHE.get(name);
+            if (headerName == HttpHeader.SET_COOKIE)
             {
                 QuotedStringTokenizer tokenizer = new QuotedStringTokenizer(value.toString(), "=;", false, false);
                 tokenizer.setSingle(false);

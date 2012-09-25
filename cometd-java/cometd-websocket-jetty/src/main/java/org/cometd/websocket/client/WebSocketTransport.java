@@ -45,7 +45,8 @@ import org.cometd.client.transport.TransportListener;
 import org.eclipse.jetty.websocket.WebSocket;
 import org.eclipse.jetty.websocket.WebSocket.Connection;
 import org.eclipse.jetty.websocket.WebSocketClient;
-import org.eclipse.jetty.websocket.WebSocketClientFactory;
+import org.eclipse.jetty.websocket.client.WebSocketClientFactory;
+import org.eclipse.jetty.websocket.core.api.WebSocketAdapter;
 
 public class WebSocketTransport extends HttpClientTransport implements MessageClientTransport
 {
@@ -413,7 +414,7 @@ public class WebSocketTransport extends HttpClientTransport implements MessageCl
         }
     }
 
-    protected class CometDWebSocket implements WebSocket.OnTextMessage
+    protected class CometDWebSocket extends WebSocketAdapter
     {
         public void onOpen(Connection connection)
         {

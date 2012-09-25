@@ -23,6 +23,7 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
 import org.junit.After;
 import org.junit.Assert;
@@ -90,7 +91,7 @@ public class OortMulticastConfigurerTest extends OortTest
     public void testTwoComets() throws Exception
     {
         Server server1 = startServer(0);
-        int groupPort = server1.getConnectors()[0].getLocalPort();
+        int groupPort = ((NetworkConnector)server1.getConnectors()[0]).getLocalPort();
         Oort oort1 = startOort(server1);
         startConfigurer(oort1, groupPort);
 
@@ -109,7 +110,7 @@ public class OortMulticastConfigurerTest extends OortTest
     public void testThreeComets() throws Exception
     {
         Server server1 = startServer(0);
-        int groupPort = server1.getConnectors()[0].getLocalPort();
+        int groupPort = ((NetworkConnector)server1.getConnectors()[0]).getLocalPort();
         Oort oort1 = startOort(server1);
         startConfigurer(oort1, groupPort);
 

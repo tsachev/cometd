@@ -25,7 +25,7 @@ import org.cometd.server.CometdServlet;
 import org.cometd.websocket.server.WebSocketTransport;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.server.nio.ServerConnector;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -78,7 +78,7 @@ public abstract class AbstractCometDTest
         cookies = new HttpCookieStore();
 
         server = new Server();
-        SelectChannelConnector connector = new SelectChannelConnector();
+        ServerConnector connector = new ServerConnector();
         server.addConnector(connector);
 
         HandlerCollection handlers = new HandlerCollection();

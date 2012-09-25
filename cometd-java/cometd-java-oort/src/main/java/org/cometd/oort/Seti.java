@@ -118,7 +118,7 @@ public class Seti extends AbstractLifeCycle
     @Override
     protected void doStart() throws Exception
     {
-        _listeners.clear();
+        listeners.clear();
 
         BayeuxServer bayeux = _oort.getBayeuxServer();
         bayeux.createIfAbsent("/seti/**", new ConfigurableServerChannel.Initializer()

@@ -24,14 +24,15 @@ import org.cometd.bayeux.server.ServerSession;
 import org.cometd.server.CometdServlet;
 import org.cometd.server.DefaultSecurityPolicy;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.bio.SocketConnector;
+//import org.eclipse.jetty.server.bio.SocketConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceCollection;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 /* ------------------------------------------------------------ */
@@ -51,18 +52,17 @@ public class CometdDemo
         String base="..";
 
         // Manually contruct context to avoid hassles with webapp classloaders for now.
-        Server server = new Server();
         QueuedThreadPool qtp = new QueuedThreadPool();
         qtp.setMinThreads(5);
         qtp.setMaxThreads(200);
-        server.setThreadPool(qtp);
+        Server server = new Server(qtp);
 
-        SelectChannelConnector connector=new SelectChannelConnector();
+        ServerConnector connector=new ServerConnector(server);
         // SocketConnector connector=new SocketConnector();
         connector.setPort(port);
-        connector.setMaxIdleTime(120000);
-        connector.setLowResourcesMaxIdleTime(60000);
-        connector.setLowResourcesConnections(20000);
+        connector.setIdleTimeout(120000);
+//        connector.setLowResourcesMaxIdleTime(60000);
+//        connector.setLowResourcesConnections(20000);
         connector.setAcceptQueueSize(5000);
         server.addConnector(connector);
         SocketConnector bconnector=new SocketConnector();
@@ -70,16 +70,17 @@ public class CometdDemo
         server.addConnector(bconnector);
 
 
-        /*
-        SslSelectChannelConnector ssl_connector=new SslSelectChannelConnector();
+        
+        SslContextFactory sslContextFactory = new SslContextFactory();
+        sslContextFactory.setKeyStorePath(base+"/examples/src/main/resources/keystore.jks");
+        sslContextFactory.setKeyStorePassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
+        sslContextFactory.setKeyPassword("OBF:1u2u1wml1z7s1z7a1wnl1u2g");
+        sslContextFactory.setTrustStorePath(base+"/examples/src/main/resources/keystore.jks");
+        sslContextFactory.setTrustStorePassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
+        ServerConnector ssl_connector=new ServerConnector(server, sslContextFactory);
         ssl_connector.setPort(port-80+443);
-        ssl_connector.setKeystore(base+"/examples/src/main/resources/keystore.jks");
-        ssl_connector.setPassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
-        ssl_connector.setKeyPassword("OBF:1u2u1wml1z7s1z7a1wnl1u2g");
-        ssl_connector.setTruststore(base+"/examples/src/main/resources/keystore.jks");
-        ssl_connector.setTrustPassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
-        server.addConnector(ssl_connector);
-        */
+
+        
 
         ContextHandlerCollection contexts = new ContextHandlerCollection();
         server.setHandler(contexts);

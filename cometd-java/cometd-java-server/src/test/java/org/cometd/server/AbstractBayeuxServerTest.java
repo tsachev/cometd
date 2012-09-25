@@ -22,7 +22,7 @@ import java.util.Map;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.server.nio.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.After;
@@ -56,7 +56,7 @@ public abstract class AbstractBayeuxServerTest
     public void startServer() throws Exception
     {
         server = new Server();
-        connector = new SelectChannelConnector();
+        connector = new ServerConnector();
         server.addConnector(connector);
 
         HandlerCollection handlers = new HandlerCollection();

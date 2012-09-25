@@ -55,8 +55,8 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerWrapper;
 import org.eclipse.jetty.server.handler.StatisticsHandler;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
-import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
+import org.eclipse.jetty.server.nio.ServerConnector;
+import org.eclipse.jetty.server.ssl.SslServerConnector;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -130,10 +130,10 @@ public class BayeuxLoadServer
         server.getContainer().addEventListener(mbContainer);
         server.addBean(mbContainer);
 
-        SelectChannelConnector connector;
+        ServerConnector connector;
         if (ssl)
         {
-            SslSelectChannelConnector sslConnector = new SslSelectChannelConnector();
+            SslServerConnector sslConnector = new SslServerConnector();
             File keyStoreFile = new File("src/main/resources/keystore.jks");
             if (!keyStoreFile.exists())
                 throw new FileNotFoundException(keyStoreFile.getAbsolutePath());
@@ -146,7 +146,7 @@ public class BayeuxLoadServer
         }
         else
         {
-            connector = new SelectChannelConnector();
+            connector = new ServerConnector();
         }
         // Make sure the OS is configured properly for load testing;
         // see http://cometd.org/documentation/howtos/loadtesting

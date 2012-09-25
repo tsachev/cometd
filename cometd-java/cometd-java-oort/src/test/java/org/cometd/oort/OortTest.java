@@ -32,7 +32,7 @@ import org.cometd.server.CometdServlet;
 import org.cometd.websocket.server.WebSocketTransport;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.After;
@@ -59,9 +59,9 @@ public abstract class OortTest
     protected Server startServer(int port) throws Exception
     {
         Server server = new Server();
-        Connector connector = new SelectChannelConnector();
+        ServerConnector connector = new ServerConnector(server);
         connector.setPort(port);
-        server.addConnector(connector);
+        
 
         String contextPath = "";
         ServletContextHandler context = new ServletContextHandler(server, contextPath);
