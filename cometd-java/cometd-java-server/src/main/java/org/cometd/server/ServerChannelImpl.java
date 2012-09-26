@@ -44,12 +44,12 @@ public class ServerChannelImpl implements ServerChannel
     private final BayeuxServerImpl _bayeux;
     private final ChannelId _id;
     private final AttributesMap _attributes = new AttributesMap();
-    private final Set<ServerSession> _subscribers = new CopyOnWriteArraySet<ServerSession>();
-    private final List<ServerChannelListener> _listeners = new CopyOnWriteArrayList<ServerChannelListener>();
-    private final List<Authorizer> _authorizers = new CopyOnWriteArrayList<Authorizer>();
+    private final Set<ServerSession> _subscribers = new CopyOnWriteArraySet<>();
+    private final List<ServerChannelListener> _listeners = new CopyOnWriteArrayList<>();
+    private final List<Authorizer> _authorizers = new CopyOnWriteArrayList<>();
     private final CountDownLatch _initialized = new CountDownLatch(1);
     private final AtomicInteger _sweeperPasses = new AtomicInteger();
-    private final Set<ServerChannelImpl> _children = new ConcurrentHashSet<ServerChannelImpl>();
+    private final Set<ServerChannelImpl> _children = new ConcurrentHashSet<>();
     private final ServerChannelImpl _parent;
     private boolean _lazy;
     private boolean _persistent;
@@ -297,18 +297,21 @@ public class ServerChannelImpl implements ServerChannel
         // as we are now "sending" this message
         mutable.setClientId(null);
 
+        // Reset the messageId to avoid clashes with message-based transports such
+        // as websocket that may rely on the messageId to match request/responses.
+        mutable.setId(null);
+
         if (_bayeux.extendSend(session, null, mutable))
             _bayeux.doPublish(session, this, mutable);
     }
 
-    public void publish(Session from, Object data, String id)
+    public void publish(Session from, Object data)
     {
         ServerMessage.Mutable mutable = _bayeux.newMessage();
         mutable.setChannel(getId());
         if (from != null)
             mutable.setClientId(from.getId());
         mutable.setData(data);
-        mutable.setId(id);
         publish(from, mutable);
     }
 

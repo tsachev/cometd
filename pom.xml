@@ -10,7 +10,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jetty-version>9.0.0.M0</jetty-version>
+        <jetty-version>9.0.0-SNAPSHOT</jetty-version>
         <jetty-plugin-version>${jetty-version}</jetty-plugin-version>
         <slf4j-version>1.7.1</slf4j-version>
         <spring-version>3.1.2.RELEASE</spring-version>
@@ -90,8 +90,8 @@
         <connection>scm:git:git://github.com/cometd/cometd.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/cometd/cometd.git</developerConnection>
         <url>https://github.com/cometd/cometd</url>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
     <organization>
         <name>Dojo Foundation</name>
@@ -391,5 +391,18 @@
         </dependencies>
     </dependencyManagement>
 
+    <!-- TODO: remove when referencing a stable Jetty release -->
+    <repositories>
+        <repository>
+            <id>jetty-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/jetty-snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
 </project>
