@@ -35,13 +35,11 @@ import org.eclipse.jetty.util.resource.ResourceCollection;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
-/* ------------------------------------------------------------ */
 /**
  * Main class for cometd demo.
  */
 public class CometdDemo
 {
-    /* ------------------------------------------------------------ */
     /**
      * @param args
      */
