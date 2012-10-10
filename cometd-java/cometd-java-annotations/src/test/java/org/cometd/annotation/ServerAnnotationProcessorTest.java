@@ -224,8 +224,8 @@ public class ServerAnnotationProcessorTest
     @Test
     public void testListenUnlisten() throws Exception
     {
-        final AtomicReference<ServerSession> sessionRef = new AtomicReference<ServerSession>();
-        final AtomicReference<ServerMessage> messageRef = new AtomicReference<ServerMessage>();
+        final AtomicReference<ServerSession> sessionRef = new AtomicReference<>();
+        final AtomicReference<ServerMessage> messageRef = new AtomicReference<>();
 
         @Service
         class S
@@ -361,7 +361,7 @@ public class ServerAnnotationProcessorTest
     @Test
     public void testSubscribeUnsubscribe() throws Exception
     {
-        final AtomicReference<Message> messageRef = new AtomicReference<Message>();
+        final AtomicReference<Message> messageRef = new AtomicReference<>();
 
         @Service
         class S
@@ -781,7 +781,7 @@ public class ServerAnnotationProcessorTest
     @Test
     public void testConfigureDefault() throws Exception
     {
-        final Set<String> configured = new HashSet<String>();
+        final Set<String> configured = new HashSet<>();
 
         @Service
         class S
@@ -821,7 +821,7 @@ public class ServerAnnotationProcessorTest
     @Test
     public void testConfigureNoErrorIfExists() throws Exception
     {
-        final List<String> configured = new ArrayList<String>();
+        final List<String> configured = new ArrayList<>();
 
         @Service
         class S
@@ -847,7 +847,7 @@ public class ServerAnnotationProcessorTest
     @Test
     public void testConfigureConfigureIfExists() throws Exception
     {
-        final List<String> configured = new ArrayList<String>();
+        final List<String> configured = new ArrayList<>();
 
         @Service
         class S

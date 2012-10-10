@@ -28,7 +28,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.cometd.bayeux.Message;
-import org.cometd.bayeux.Message.Mutable;
 import org.cometd.common.HashMapMessage;
 import org.eclipse.jetty.client.HttpClient;
 import org.junit.Rule;
@@ -117,7 +116,7 @@ public class LongPollingTransportTest
                 transport.init();
 
                 long start = System.nanoTime();
-                transport.send(new EmptyTransportListener()
+                transport.send(new TransportListener.Empty()
                 {
                     @Override
                     public void onMessages(List<Message.Mutable> messages)
@@ -196,15 +195,13 @@ public class LongPollingTransportTest
                 transport.init();
 
                 long start = System.nanoTime();
-                transport.send(new EmptyTransportListener()
+                transport.send(new TransportListener.Empty()
                 {
                     @Override
                     public void onFailure(Throwable failure, Message[] messages)
                     {
-                    	if (failure instanceof ProtocolException)
-                    	{
-                    		latch.countDown();
-                    	}
+                        if (failure instanceof ProtocolException)
+                            latch.countDown();
                     }
                 });
                 long end = System.nanoTime();
@@ -243,15 +240,13 @@ public class LongPollingTransportTest
             transport.setURL(serverURL);
             transport.init();
 
-            transport.send(new EmptyTransportListener()
+            transport.send(new TransportListener.Empty()
             {
                 @Override
                 public void onFailure(Throwable failure, Message[] messages)
                 {
-                	if (failure instanceof ConnectException)
-                	{
-                		latch.countDown();
-                	}
+                    if (failure instanceof ConnectException)
+                        latch.countDown();
                 }
             });
 
@@ -304,7 +299,7 @@ public class LongPollingTransportTest
                 transport.init();
 
                 long start = System.nanoTime();
-                transport.send(new EmptyTransportListener()
+                transport.send(new TransportListener.Empty()
                 {
                     @Override
                     public void onFailure(Throwable failure, Message[] messages)
@@ -382,15 +377,13 @@ public class LongPollingTransportTest
                 transport.setURL(serverURL);
                 transport.init();
 
-                transport.send(new EmptyTransportListener()
+                transport.send(new TransportListener.Empty()
                 {
                     @Override
                     public void onFailure(Throwable failure, Message[] messages)
                     {
-                    	if (failure instanceof TimeoutException)
-                    	{
-                    		latch.countDown();
-                    	}
+                        if (failure instanceof TimeoutException)
+                            latch.countDown();
                     }
                 });
 
@@ -406,21 +399,6 @@ public class LongPollingTransportTest
             serverThread.join();
             assertNull(serverException.get());
             serverSocket.close();
-        }
-    }
-
-    private class EmptyTransportListener implements TransportListener
-    {
-        public void onSending(Message[] messages)
-        {
-        }
-
-        public void onMessages(List<Mutable> metaMessages)
-        {
-        }
-
-        public void onFailure(Throwable failure, Message[] messages)
-        {
         }
     }
 }

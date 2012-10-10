@@ -34,7 +34,6 @@ public class MissingContentTypeTest extends ClientServerTest
             @Override
             protected void customize(Request request)
             {
-                super.customize(request);
                 request.headers().remove(HttpHeader.CONTENT_TYPE);
             }
         });

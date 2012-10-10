@@ -37,7 +37,7 @@ public class ClientServerTest
     public final TestWatcher testName = new TestWatcher()
     {
         @Override
-        public void starting(Description description)
+        protected void starting(Description description)
         {
             super.starting(description);
             System.err.printf("Running %s.%s%n", description.getTestClass().getName(), description.getMethodName());

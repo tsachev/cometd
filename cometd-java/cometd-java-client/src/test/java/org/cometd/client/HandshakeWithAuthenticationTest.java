@@ -72,7 +72,6 @@ public class HandshakeWithAuthenticationTest extends ClientServerTest
             @Override
             protected void customize(Request request)
             {
-                super.customize(request);
                 String authorization = userName + ":" + password;
                 authorization = B64Code.encode(authorization);
                 request.header("Authorization", "Basic " + authorization);

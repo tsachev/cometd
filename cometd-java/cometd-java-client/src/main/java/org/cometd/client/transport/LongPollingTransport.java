@@ -222,7 +222,7 @@ public class LongPollingTransport extends HttpClientTransport
         });
     }
 
-    protected void customize(final Request request)
+    protected void customize(Request request)
     {
     }
 }

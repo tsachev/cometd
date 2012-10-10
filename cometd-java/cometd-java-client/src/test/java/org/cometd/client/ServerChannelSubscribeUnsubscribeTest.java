@@ -107,7 +107,7 @@ public class ServerChannelSubscribeUnsubscribeTest extends ClientServerTest
         Assert.assertFalse(messageLatch.get().await(1, TimeUnit.SECONDS));
 
         // Tell the server to resubscribe the session
-        Map<String, Object> resubscribe = new HashMap<String, Object>();
+        Map<String, Object> resubscribe = new HashMap<>();
         resubscribe.put(actionField, subscribeAction);
         systemChannel.publish(resubscribe);
         Assert.assertTrue(resubscribeLatch.await(5, TimeUnit.SECONDS));
