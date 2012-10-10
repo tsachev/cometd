@@ -110,20 +110,22 @@ public class AckExtensionTest extends ClientServerTest
             Assert.assertEquals("hello_" + i, messages.poll(5, TimeUnit.SECONDS).getData());
 
         int port = connector.getLocalPort();
-        connector.stop();
+        server.stop();
         Thread.sleep(1000);
         Assert.assertTrue(connector.isStopped());
         Assert.assertTrue(client.waitFor(5000, BayeuxClient.State.UNCONNECTED));
 
         // Send messages while client is offline
         for (int i = count; i < 2 * count; ++i)
-            chatChannel.publish(null, "hello_" + i, null);
+            chatChannel.publish(null, "hello_" + i);
 
         Thread.sleep(1000);
         Assert.assertEquals(0, messages.size());
 
         connector.setPort(port);
-        connector.start();
+        server.start();
+        Thread.sleep(1000);
+        Assert.assertTrue(connector.isStarted());
         Assert.assertTrue(client.waitFor(5000, BayeuxClient.State.CONNECTED));
 
         // Check that the offline messages are received

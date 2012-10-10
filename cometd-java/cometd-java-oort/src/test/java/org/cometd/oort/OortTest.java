@@ -30,38 +30,37 @@ import org.cometd.client.BayeuxClient;
 import org.cometd.client.transport.LongPollingTransport;
 import org.cometd.server.CometdServlet;
 import org.cometd.websocket.server.WebSocketTransport;
-import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.After;
 import org.junit.Rule;
-import org.junit.rules.TestWatchman;
-import org.junit.runners.model.FrameworkMethod;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 
 public abstract class OortTest
 {
     @Rule
-    public final TestWatchman testName = new TestWatchman()
+    public final TestWatcher testName = new TestWatcher()
     {
         @Override
-        public void starting(FrameworkMethod method)
+        protected void starting(Description description)
         {
-            super.starting(method);
-            System.err.printf("Running %s.%s%n", method.getMethod().getDeclaringClass().getName(), method.getName());
+            super.starting(description);
+            System.err.printf("Running %s.%s%n", description.getTestClass().getName(), description.getMethodName());
         }
     };
-    private final List<Server> servers = new ArrayList<Server>();
-    private final List<Oort> oorts = new ArrayList<Oort>();
-    private final List<BayeuxClient> clients = new ArrayList<BayeuxClient>();
+    private final List<Server> servers = new ArrayList<>();
+    private final List<Oort> oorts = new ArrayList<>();
+    private final List<BayeuxClient> clients = new ArrayList<>();
 
     protected Server startServer(int port) throws Exception
     {
         Server server = new Server();
         ServerConnector connector = new ServerConnector(server);
         connector.setPort(port);
-        
+        server.addConnector(connector);
 
         String contextPath = "";
         ServletContextHandler context = new ServletContextHandler(server, contextPath);
@@ -70,7 +69,7 @@ public abstract class OortTest
         ServletHolder cometdServletHolder = new ServletHolder(CometdServlet.class);
         cometdServletHolder.setInitParameter("timeout", "10000");
         cometdServletHolder.setInitParameter("transports", WebSocketTransport.class.getName());
-        if (Boolean.getBoolean("debugTests"))
+        if (debugTests())
             cometdServletHolder.setInitParameter("logLevel", "3");
         cometdServletHolder.setInitOrder(1);
 
@@ -93,16 +92,20 @@ public abstract class OortTest
         String url = (String)server.getAttribute(OortConfigServlet.OORT_URL_PARAM);
         final BayeuxServer bayeuxServer = (BayeuxServer)server.getAttribute(BayeuxServer.ATTRIBUTE);
         Oort oort = new Oort(bayeuxServer, url);
-        oort.setClientDebugEnabled(Boolean.getBoolean("debugTests"));
+        oort.setClientDebugEnabled(debugTests());
         oort.start();
         oorts.add(oort);
         return oort;
     }
 
+    private boolean debugTests() {
+        return true;//Boolean.getBoolean("debugTests");
+    }
+
     protected BayeuxClient startClient(Oort oort, Map<String, Object> handshakeFields)
     {
         BayeuxClient client = new BayeuxClient(oort.getURL(), new LongPollingTransport(null, oort.getHttpClient()));
-        client.setDebugEnabled(Boolean.getBoolean("debugTests"));
+        client.setDebugEnabled(debugTests());
         client.handshake(handshakeFields);
         client.waitFor(5000, BayeuxClient.State.CONNECTED);
         clients.add(client);

@@ -18,7 +18,9 @@ package org.cometd.common;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.cometd.bayeux.ChannelId;
 import org.cometd.bayeux.Message;
@@ -176,4 +178,26 @@ public class HashMapMessage extends HashMap<String, Object> implements Message.M
     // The code below is a relic of a mistake in the API, but it is kept for backward compatibility.
 
     private static JSONContext.Client _jsonContext = new JettyJSONContextClient();
+
+    @Override
+    public String toString() {
+        Iterator<Entry<String,Object>> i = entrySet().iterator();
+        if (! i.hasNext())
+            return "{}";
+
+        StringBuilder sb = new StringBuilder();
+        sb.append('{');
+        for (;;) {
+            Entry<String,Object> e = i.next();
+            Object key = e.getKey();
+            Object value = e.getValue();
+            sb.append(key == this ? "(this Map)" : key);
+            sb.append('=');
+            String stringValue = String.valueOf(value);
+            sb.append(value == this ? "(this Map)" : (stringValue.length()) > 50 ?  stringValue.substring(0, 50): value);
+            if (! i.hasNext())
+                return sb.append('}').toString();
+            sb.append(',').append(' ');
+        }
+    }
 }

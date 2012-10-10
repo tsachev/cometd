@@ -42,7 +42,7 @@ public class SimulatedNetworkFailureTest extends ClientServerTest
     @Before
     public void setUp() throws Exception
     {
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> params = new HashMap<>();
         params.put("timeout", String.valueOf(timeout));
         params.put("maxInterval", String.valueOf(maxInterval));
         params.put("sweepIntervalMs", String.valueOf(sweepInterval));
@@ -53,7 +53,7 @@ public class SimulatedNetworkFailureTest extends ClientServerTest
     public void testClientShortNetworkFailure() throws Exception
     {
         final CountDownLatch connectLatch = new CountDownLatch(2);
-        final AtomicReference<CountDownLatch> publishLatch = new AtomicReference<CountDownLatch>();
+        final AtomicReference<CountDownLatch> publishLatch = new AtomicReference<>();
         final AtomicBoolean connected = new AtomicBoolean(false);
 
         TestBayeuxClient client = new TestBayeuxClient()
@@ -101,7 +101,7 @@ public class SimulatedNetworkFailureTest extends ClientServerTest
 
         // Publish, it must succeed
         publishLatch.set(new CountDownLatch(1));
-        channel.publish(new HashMap());
+        channel.publish(new HashMap<String, Object>());
         assertTrue(publishLatch.get().await(5, TimeUnit.SECONDS));
 
         // Wait for the connect to return
@@ -114,7 +114,7 @@ public class SimulatedNetworkFailureTest extends ClientServerTest
 
         // Another publish, it must fail
         publishLatch.set(new CountDownLatch(1));
-        channel.publish(new HashMap());
+        channel.publish(new HashMap<String, Object>());
         assertTrue(publishLatch.get().await(5, TimeUnit.SECONDS));
 
         // Sleep to allow the next connect to be issued
@@ -126,7 +126,7 @@ public class SimulatedNetworkFailureTest extends ClientServerTest
 
         // We should be able to publish now
         publishLatch.set(new CountDownLatch(1));
-        channel.publish(new HashMap());
+        channel.publish(new HashMap<String, Object>());
         assertFalse(publishLatch.get().await(1, TimeUnit.SECONDS));
 
         disconnectBayeuxClient(client);
@@ -137,7 +137,7 @@ public class SimulatedNetworkFailureTest extends ClientServerTest
     {
         final CountDownLatch connectLatch = new CountDownLatch(2);
         final CountDownLatch handshakeLatch = new CountDownLatch(2);
-        final AtomicReference<CountDownLatch> publishLatch = new AtomicReference<CountDownLatch>();
+        final AtomicReference<CountDownLatch> publishLatch = new AtomicReference<>();
         final AtomicBoolean connected = new AtomicBoolean(false);
 
         TestBayeuxClient client = new TestBayeuxClient()
@@ -193,7 +193,7 @@ public class SimulatedNetworkFailureTest extends ClientServerTest
 
         // Publish, it must succeed
         publishLatch.set(new CountDownLatch(1));
-        channel.publish(new HashMap());
+        channel.publish(new HashMap<String, Object>());
         assertTrue(publishLatch.get().await(5, TimeUnit.SECONDS));
 
         // Wait for the connect to return
@@ -206,7 +206,7 @@ public class SimulatedNetworkFailureTest extends ClientServerTest
 
         // Another publish, it must fail
         publishLatch.set(new CountDownLatch(1));
-        channel.publish(new HashMap());
+        channel.publish(new HashMap<String, Object>());
         assertTrue(publishLatch.get().await(5, TimeUnit.SECONDS));
 
         // Sleep to allow the next connect to be issued
@@ -218,7 +218,7 @@ public class SimulatedNetworkFailureTest extends ClientServerTest
 
         // We should be able to publish now
         publishLatch.set(new CountDownLatch(1));
-        channel.publish(new HashMap());
+        channel.publish(new HashMap<String, Object>());
         assertFalse(publishLatch.get().await(1, TimeUnit.SECONDS));
 
         disconnectBayeuxClient(client);

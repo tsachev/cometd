@@ -43,6 +43,7 @@ public class BayeuxClientUsageTest extends ClientServerTest
         testClient(newBayeuxClient());
     }
 
+    /*
     @Test
     public void testClientWithSocketConnector() throws Exception
     {
@@ -52,6 +53,7 @@ public class BayeuxClientUsageTest extends ClientServerTest
         httpClient.start();
         testClient(newBayeuxClient());
     }
+     */
 
     @Test
     public void testClientWithJackson() throws Exception

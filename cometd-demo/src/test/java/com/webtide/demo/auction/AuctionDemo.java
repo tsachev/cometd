@@ -22,7 +22,7 @@ import org.cometd.oort.SetiServlet;
 import org.cometd.server.CometdServlet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.server.nio.ServerConnector;
+import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
@@ -59,7 +59,7 @@ public class AuctionDemo
         qtp.setMaxThreads(200);
         server.setThreadPool(qtp);
 
-        ServerConnector connector=new ServerConnector();
+        SelectChannelConnector connector=new SelectChannelConnector();
         // SocketConnector connector=new SocketConnector();
         connector.setPort(port);
         server.addConnector(connector);

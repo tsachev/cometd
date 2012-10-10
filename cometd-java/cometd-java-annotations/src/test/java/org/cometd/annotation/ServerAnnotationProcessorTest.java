@@ -302,7 +302,7 @@ public class ServerAnnotationProcessorTest
                 // However if the Listener.receiveOwnPublishes attribute is not taken in account
                 // this callback is called again, and we want to test that this does not happen.
                 if (count == 1)
-                    bayeuxServer.getChannel(channelName).publish(serverSession, new HashMap(), null);
+                    bayeuxServer.getChannel(channelName).publish(serverSession, new HashMap());
             }
         }
 
@@ -340,7 +340,7 @@ public class ServerAnnotationProcessorTest
                 String channelName = "/foo/own";
                 bayeuxServer.createIfAbsent(channelName);
                 if (!channelName.equals(message.getChannel()))
-                    bayeuxServer.getChannel(channelName).publish(serverSession, new HashMap(), null);
+                    bayeuxServer.getChannel(channelName).publish(serverSession, new HashMap());
             }
         }
 

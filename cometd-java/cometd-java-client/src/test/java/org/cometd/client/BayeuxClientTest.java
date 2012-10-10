@@ -52,7 +52,9 @@ import org.cometd.client.transport.LongPollingTransport;
 import org.cometd.common.HashMapMessage;
 import org.cometd.server.BayeuxServerImpl;
 import org.cometd.server.DefaultSecurityPolicy;
-import org.eclipse.jetty.client.ContentExchange;
+import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.client.api.Request;
+import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.FilterMapping;
 import org.eclipse.jetty.util.BlockingArrayQueue;
@@ -142,11 +144,11 @@ public class BayeuxClientTest extends ClientServerTest
         LongPollingTransport transport = new LongPollingTransport(null, httpClient)
         {
             @Override
-            protected void customize(ContentExchange exchange)
+            protected void customize(Request request)
             {
-                super.customize(exchange);
+                super.customize(request);
                 // Remove the address so that the send will fail
-                exchange.setAddress(null);
+                request.setAddress(null);
             }
         };
         final AtomicReference<CountDownLatch> latch = new AtomicReference<CountDownLatch>(new CountDownLatch(1));
@@ -189,11 +191,11 @@ public class BayeuxClientTest extends ClientServerTest
         LongPollingTransport transport = new LongPollingTransport(null, httpClient)
         {
             @Override
-            protected void customize(ContentExchange exchange)
+            protected void customize(Request request)
             {
-                super.customize(exchange);
+                super.customize(request);
                 // Modify the exchange so that the server chokes it
-                exchange.setMethod("PUT");
+                request.method(HttpMethod.GET);
             }
         };
         final AtomicReference<CountDownLatch> latch = new AtomicReference<CountDownLatch>(new CountDownLatch(1));
@@ -312,7 +314,7 @@ public class BayeuxClientTest extends ClientServerTest
     {
         context.stop();
         TestFilter filter = new TestFilter();
-        context.addFilter(new FilterHolder(filter), "/*", FilterMapping.DEFAULT);
+        context.addFilter(new FilterHolder(filter), "/*", null);
         context.start();
 
         final BlockingArrayQueue<Message> queue = new BlockingArrayQueue<Message>(100, 100);
@@ -689,11 +691,14 @@ public class BayeuxClientTest extends ClientServerTest
         final CountDownLatch connectLatch = new CountDownLatch(2);
         client.getChannel(Channel.META_CONNECT).addListener(new ClientSessionChannel.MessageListener()
         {
+            final Object mx = new Object();
             public void onMessage(ClientSessionChannel channel, Message message)
             {
+            	synchronized (mx) {
                 if (connectLatch.getCount() > 1 && message.isSuccessful() ||
                         connectLatch.getCount() == 1 && !message.isSuccessful())
-                connectLatch.countDown();
+                    connectLatch.countDown();
+            	}
             }
         });
 
@@ -1082,12 +1087,12 @@ public class BayeuxClientTest extends ClientServerTest
         LongPollingTransport transport = new LongPollingTransport(null, httpClient)
         {
             @Override
-            protected void customize(ContentExchange exchange)
+            protected void customize(Request request)
             {
-                super.customize(exchange);
+                super.customize(request);
 
                 if (failHandShake.compareAndSet(true, false))
-                    exchange.setAddress(null);
+                    request.setAddress(null);
             }
         };
 

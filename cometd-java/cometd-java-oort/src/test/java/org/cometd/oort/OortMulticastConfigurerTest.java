@@ -33,7 +33,7 @@ import org.junit.Test;
 
 public class OortMulticastConfigurerTest extends OortTest
 {
-    private final List<OortMulticastConfigurer> configurers = new ArrayList<OortMulticastConfigurer>();
+    private final List<OortMulticastConfigurer> configurers = new ArrayList<>();
 
     @Before
     public void assumeMulticast() throws Exception

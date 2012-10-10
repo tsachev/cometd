@@ -45,6 +45,10 @@ import org.junit.Test;
 
 public class BayeuxClientTest extends ClientServerWebSocketTest
 {
+    @Override
+    protected boolean debugTests() {
+     return true;
+    }
     @Before
     public void setUp() throws Exception
     {
@@ -424,8 +428,8 @@ public class BayeuxClientTest extends ClientServerWebSocketTest
         });
 
         client.handshake();
-        Assert.assertTrue(handshakeLatch.await(5, TimeUnit.SECONDS));
-        Assert.assertTrue(connectLatch.await(5, TimeUnit.SECONDS));
+        Assert.assertTrue(handshakeLatch.await(500, TimeUnit.SECONDS));
+        Assert.assertTrue(connectLatch.await(500, TimeUnit.SECONDS));
 
         final CountDownLatch publishLatch = new CountDownLatch(1);
         ClientSessionChannel.MessageListener subscriber = new ClientSessionChannel.MessageListener()

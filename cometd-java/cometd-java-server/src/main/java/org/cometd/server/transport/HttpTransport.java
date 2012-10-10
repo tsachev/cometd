@@ -50,7 +50,7 @@ public abstract class HttpTransport extends AbstractServerTransport
         super(bayeux, name);
     }
 
-    public abstract boolean accept(HttpServletRequest request);
+    public abstract boolean accept(HttpServletRequest request, HttpServletResponse response);
 
     public abstract void handle(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException;
 

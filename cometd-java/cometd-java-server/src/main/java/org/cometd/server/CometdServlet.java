@@ -145,7 +145,7 @@ public class CometdServlet extends HttpServlet
             if (serverTransport instanceof HttpTransport)
             {
                 HttpTransport t = (HttpTransport)serverTransport;
-                if (t.accept(request))
+                if (t.accept(request, response))
                 {
                     transport = t;
                     break;

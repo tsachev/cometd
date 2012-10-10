@@ -55,7 +55,7 @@ public class JSONTransport extends LongPollingTransport
     }
 
     @Override
-    public boolean accept(HttpServletRequest request)
+    public boolean accept(HttpServletRequest request, HttpServletResponse response)
     {
         return "POST".equals(request.getMethod());
     }

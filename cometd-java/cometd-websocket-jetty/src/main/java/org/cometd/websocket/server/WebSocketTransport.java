@@ -48,11 +48,19 @@ import org.cometd.server.AbstractServerTransport;
 import org.cometd.server.BayeuxServerImpl;
 import org.cometd.server.ServerSessionImpl;
 import org.cometd.server.transport.HttpTransport;
+import org.eclipse.jetty.util.FutureCallback;
 import org.eclipse.jetty.util.component.LifeCycle;
-import org.eclipse.jetty.websocket.WebSocket;
-import org.eclipse.jetty.websocket.WebSocketFactory;
+import org.eclipse.jetty.websocket.core.api.UpgradeRequest;
+import org.eclipse.jetty.websocket.core.api.UpgradeResponse;
+import org.eclipse.jetty.websocket.core.api.WebSocketAdapter;
+import org.eclipse.jetty.websocket.core.api.WebSocketBehavior;
+import org.eclipse.jetty.websocket.core.api.WebSocketConnection;
+import org.eclipse.jetty.websocket.core.api.WebSocketPolicy;
+import org.eclipse.jetty.websocket.server.ServletWebSocketRequest;
+import org.eclipse.jetty.websocket.server.WebSocketCreator;
+import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
 
-public class WebSocketTransport extends HttpTransport implements WebSocketFactory.Acceptor
+public class WebSocketTransport extends HttpTransport implements WebSocketCreator
 {
     public static final String PREFIX = "ws";
     public static final String NAME = "websocket";
@@ -63,7 +71,7 @@ public class WebSocketTransport extends HttpTransport implements WebSocketFactor
     public static final String IDLE_TIMEOUT_OPTION = "idleTimeout";
     public static final String THREAD_POOL_MAX_SIZE = "threadPoolMaxSize";
 
-    private final WebSocketFactory _factory = new WebSocketFactory(this);
+    private final WebSocketServerFactory _factory = new WebSocketServerFactory(new WebSocketPolicy(WebSocketBehavior.SERVER));
     private final ThreadLocal<WebSocketContext> _handshake = new ThreadLocal<WebSocketContext>();
     private String _protocol;
     private Executor _executor;
@@ -74,6 +82,7 @@ public class WebSocketTransport extends HttpTransport implements WebSocketFactor
     {
         super(bayeux, NAME);
         setOptionPrefix(PREFIX);
+        _factory.setCreator(this);
     }
 
     @Override
@@ -82,12 +91,13 @@ public class WebSocketTransport extends HttpTransport implements WebSocketFactor
         super.init();
         _protocol = getOption(PROTOCOL_OPTION, _protocol);
         _messagesPerFrame = getOption(MESSAGES_PER_FRAME_OPTION, _messagesPerFrame);
-        int bufferSize = getOption(BUFFER_SIZE_OPTION, _factory.getBufferSize());
-        _factory.setBufferSize(bufferSize);
+        WebSocketPolicy policy = _factory.getPolicy();
+        int bufferSize = getOption(BUFFER_SIZE_OPTION, policy.getBufferSize());
+        policy.setBufferSize(bufferSize);
         int maxMessageSize = getOption(MAX_MESSAGE_SIZE_OPTION, bufferSize - 16);
-        _factory.setMaxTextMessageSize(maxMessageSize);
-        long idleTimeout = getOption(IDLE_TIMEOUT_OPTION, _factory.getMaxIdleTime());
-        _factory.setMaxIdleTime((int)idleTimeout);
+        policy.setMaxTextMessageSize(maxMessageSize);
+        long idleTimeout = getOption(IDLE_TIMEOUT_OPTION, policy.getIdleTimeout());
+        policy.setIdleTimeout((int)idleTimeout);
         _executor = newExecutor();
         _scheduler = newScheduledExecutor();
         try
@@ -146,9 +156,9 @@ public class WebSocketTransport extends HttpTransport implements WebSocketFactor
     }
 
     @Override
-    public boolean accept(HttpServletRequest request)
+    public boolean accept(HttpServletRequest request, HttpServletResponse response)
     {
-        return "WebSocket".equalsIgnoreCase(request.getHeader("Upgrade"));
+        return _factory.isUpgradeRequest(request, response);
     }
 
     @Override
@@ -162,13 +172,12 @@ public class WebSocketTransport extends HttpTransport implements WebSocketFactor
         }
     }
 
-    public WebSocket doWebSocketConnect(HttpServletRequest request, String protocol)
+    public Object createWebSocket(UpgradeRequest req, UpgradeResponse resp)
     {
-        boolean sameProtocol = (_protocol == null && protocol == null) ||
-                (_protocol != null && _protocol.equals(protocol));
-
-        if (sameProtocol)
+        if (_protocol == null || req.hasSubProtocol(_protocol))
         {
+            resp.setAcceptedSubProtocol(_protocol);
+            ServletWebSocketRequest request = (ServletWebSocketRequest) req;
             WebSocketContext handshake = new WebSocketContext(request);
             return new WebSocketScheduler(handshake, request.getHeader("User-Agent"));
         }
@@ -176,17 +185,12 @@ public class WebSocketTransport extends HttpTransport implements WebSocketFactor
         return null;
     }
 
-    public boolean checkOrigin(HttpServletRequest request, String origin)
-    {
-        return true;
-    }
-
-    protected void handleJSONParseException(WebSocket.Connection connection, String json, Throwable exception)
+    protected void handleJSONParseException(WebSocketConnection connection, String json, Throwable exception)
     {
         _logger.warn("Error parsing JSON: " + json, exception);
     }
 
-    protected void handleException(WebSocket.Connection connection, Throwable exception)
+    protected void handleException(WebSocketConnection connection, Throwable exception)
     {
         _logger.warn("", exception);
     }
@@ -197,7 +201,7 @@ public class WebSocketTransport extends HttpTransport implements WebSocketFactor
         return _handshake.get();
     }
 
-    protected void send(WebSocket.Connection connection, List<ServerMessage> messages) throws IOException
+    protected void send(WebSocketConnection connection, List<ServerMessage> messages) throws IOException
     {
         if (messages.isEmpty())
             return;
@@ -231,30 +235,35 @@ public class WebSocketTransport extends HttpTransport implements WebSocketFactor
         }
     }
 
-    protected void send(WebSocket.Connection connection, ServerMessage message) throws IOException
+    protected void send(WebSocketConnection connection, ServerMessage message) throws IOException
     {
         StringBuilder builder = new StringBuilder(message.size() * 32);
         builder.append("[").append(message.getJSON()).append("]");
         send(connection, builder.toString());
     }
 
-    protected void send(WebSocket.Connection connection, String data) throws IOException
+    protected void send(WebSocketConnection connection, String data) throws IOException
     {
         debug("Sending {}", data);
-        connection.sendMessage(data);
+        connection.write(connection, new FutureCallback<WebSocketConnection>(){
+            @Override
+            public void failed(WebSocketConnection context, Throwable cause) {
+                handleException(context, cause);
+            }
+        }, data);
     }
 
     protected void onClose(int code, String message)
     {
     }
 
-    protected class WebSocketScheduler implements WebSocket.OnTextMessage, AbstractServerTransport.Scheduler, Runnable
+    protected class WebSocketScheduler extends WebSocketAdapter implements AbstractServerTransport.Scheduler, Runnable
     {
         private final AtomicBoolean _scheduling = new AtomicBoolean();
         private final WebSocketContext _context;
         private final String _userAgent;
         private volatile ServerSessionImpl _session;
-        private volatile Connection _connection;
+        private volatile WebSocketConnection _connection;
         private ServerMessage.Mutable _connectReply;
         private ScheduledFuture _connectTask;
 
@@ -264,12 +273,15 @@ public class WebSocketTransport extends HttpTransport implements WebSocketFactor
             _userAgent = userAgent;
         }
 
-        public void onOpen(Connection connection)
+        @Override
+        public void onWebSocketConnect(WebSocketConnection connection)
         {
+            super.onWebSocketConnect(connection);
             _connection = connection;
         }
 
-        public void onClose(int code, String reason)
+        @Override
+        public void onWebSocketClose(int code, String reason)
         {
             final ServerSessionImpl session = _session;
             if (session != null)
@@ -283,6 +295,7 @@ public class WebSocketTransport extends HttpTransport implements WebSocketFactor
             }
             debug("Closing {}/{}", code, reason);
             WebSocketTransport.this.onClose(code, reason);
+            super.onWebSocketClose(code, reason);
         }
 
         private boolean cancelMetaConnectTask(ServerSessionImpl session)
@@ -299,7 +312,8 @@ public class WebSocketTransport extends HttpTransport implements WebSocketFactor
             return true;
         }
 
-        public void onMessage(String data)
+        @Override
+        public void onWebSocketText(String data)
         {
             _handshake.set(_context);
             getBayeux().setCurrentTransport(WebSocketTransport.this);
@@ -611,7 +625,7 @@ public class WebSocketTransport extends HttpTransport implements WebSocketFactor
         private final String _url;
 
         @SuppressWarnings("unchecked")
-        public WebSocketContext(HttpServletRequest request)
+        public WebSocketContext(ServletWebSocketRequest request)
         {
             _local = new InetSocketAddress(request.getLocalAddr(), request.getLocalPort());
             _remote = new InetSocketAddress(request.getRemoteAddr(), request.getRemotePort());

@@ -49,9 +49,9 @@ public class PublishCallbackTest extends ClientServerTest
         client.handshake();
         assertTrue(client.waitFor(5000, BayeuxClient.State.CONNECTED));
 
-        final AtomicReference<CountDownLatch> latch = new AtomicReference<CountDownLatch>(new CountDownLatch(1));
+        final AtomicReference<CountDownLatch> latch = new AtomicReference<>(new CountDownLatch(1));
         ClientSessionChannel channel = client.getChannel("/test");
-        channel.publish(new HashMap(), new ClientSessionChannel.MessageListener()
+        channel.publish(new HashMap<String, Object>(), new ClientSessionChannel.MessageListener()
         {
             public void onMessage(ClientSessionChannel channel, Message message)
             {
@@ -64,7 +64,7 @@ public class PublishCallbackTest extends ClientServerTest
 
         // Publish again without callback, must not trigger the previous callback
         latch.set(new CountDownLatch(1));
-        channel.publish(new HashMap());
+        channel.publish(new HashMap<String, Object>());
 
         Assert.assertFalse(latch.get().await(1, TimeUnit.SECONDS));
 
@@ -87,9 +87,9 @@ public class PublishCallbackTest extends ClientServerTest
         client.handshake();
         assertTrue(client.waitFor(5000, BayeuxClient.State.CONNECTED));
 
-        final AtomicReference<CountDownLatch> latch = new AtomicReference<CountDownLatch>(new CountDownLatch(1));
+        final AtomicReference<CountDownLatch> latch = new AtomicReference<>(new CountDownLatch(1));
         ClientSessionChannel channel = client.getChannel("/test");
-        channel.publish(new HashMap(), new ClientSessionChannel.MessageListener()
+        channel.publish(new HashMap<String, Object>(), new ClientSessionChannel.MessageListener()
         {
             public void onMessage(ClientSessionChannel channel, Message message)
             {
@@ -118,9 +118,9 @@ public class PublishCallbackTest extends ClientServerTest
         BayeuxClient client = newBayeuxClient();
         client.handshake();
 
-        final AtomicReference<CountDownLatch> latch = new AtomicReference<CountDownLatch>(new CountDownLatch(1));
+        final AtomicReference<CountDownLatch> latch = new AtomicReference<>(new CountDownLatch(1));
         ClientSessionChannel channel = client.getChannel("/test");
-        channel.publish(new HashMap(), new ClientSessionChannel.MessageListener()
+        channel.publish(new HashMap<String, Object>(), new ClientSessionChannel.MessageListener()
         {
             public void onMessage(ClientSessionChannel channel, Message message)
             {

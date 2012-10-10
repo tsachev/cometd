@@ -24,31 +24,30 @@ import org.cometd.server.BayeuxServerImpl;
 import org.cometd.server.CometdServlet;
 import org.cometd.websocket.client.WebSocketTransport;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.nio.ServerConnector;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
-import org.eclipse.jetty.websocket.WebSocketClientFactory;
+import org.eclipse.jetty.websocket.client.WebSocketClientFactory;
 import org.junit.After;
 import org.junit.Rule;
-import org.junit.rules.TestWatchman;
-import org.junit.runners.model.FrameworkMethod;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;;
 
 public abstract class ClientServerWebSocketTest
 {
     @Rule
-    public final TestWatchman testName = new TestWatchman()
+    public final TestWatcher testName = new TestWatcher()
     {
         @Override
-        public void starting(FrameworkMethod method)
+        public void starting(Description description)
         {
-            super.starting(method);
-            System.err.printf("Running %s.%s%n", method.getMethod().getDeclaringClass().getName(), method.getName());
+            super.starting(description);
+            System.err.printf("Running %s.%s%n", description.getTestClass().getName(), description.getMethodName());
         }
     };
-    protected Connector connector;
+    protected ServerConnector connector;
     protected Server server;
     protected String contextPath;
     protected ServletContextHandler context;
@@ -63,8 +62,8 @@ public abstract class ClientServerWebSocketTest
     {
         server = new Server();
 
-        connector = new ServerConnector();
-        connector.setMaxIdleTime(30000);
+        connector = new ServerConnector(server);
+        connector.setIdleTimeout(30000);
         server.addConnector(connector);
 
         contextPath = "";
@@ -90,10 +89,9 @@ public abstract class ClientServerWebSocketTest
 
         wsThreadPool = new QueuedThreadPool();
         wsThreadPool.setName(wsThreadPool.getName() + "-client");
-        wsThreadPool.setMaxStopTimeMs(1000);
+        wsThreadPool.setStopTimeout(1000);
 
         wsFactory = new WebSocketClientFactory(wsThreadPool);
-
         startServer();
     }
 
@@ -139,6 +137,6 @@ public abstract class ClientServerWebSocketTest
 
     protected boolean debugTests()
     {
-        return Boolean.getBoolean("debugTests");
+        return true;//Boolean.getBoolean("debugTests");
     }
 }

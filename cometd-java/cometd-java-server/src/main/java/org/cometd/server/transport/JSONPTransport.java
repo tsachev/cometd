@@ -64,7 +64,7 @@ public class JSONPTransport extends LongPollingTransport
     }
 
     @Override
-    public boolean accept(HttpServletRequest request)
+    public boolean accept(HttpServletRequest request, HttpServletResponse response)
     {
         return "GET".equals(request.getMethod()) && request.getParameter(getCallbackParameter()) != null;
     }
